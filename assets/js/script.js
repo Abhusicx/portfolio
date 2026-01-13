@@ -66,13 +66,36 @@ const selectValue = document.querySelector("[data-select-value]");
 
 const filterBtn = document.querySelectorAll("[data-filter-btn]");
 
+// filter variables
+const filterItems = document.querySelectorAll("[data-filter-item]");
+
+// NEW: empty state section selector (add data-portfolio-empty to the empty section in HTML)
+const emptyPortfolioSection = document.querySelector("[data-portfolio-empty]");
+
+// NEW: toggle empty state only when no project is visible
+const updatePortfolioEmptyState = function () {
+  if (!emptyPortfolioSection) return;
+
+  // Store a "show" display value once.
+  // If CSS currently hides it (display: none), fallback to "block" so UI actually appears.
+  if (!emptyPortfolioSection.dataset.originalDisplay) {
+    const computed = window.getComputedStyle(emptyPortfolioSection).display;
+    emptyPortfolioSection.dataset.originalDisplay = (computed && computed !== "none") ? computed : "block";
+  }
+
+  const activeCount = document.querySelectorAll("[data-filter-item].active").length;
+
+  if (activeCount === 0) {
+    emptyPortfolioSection.style.display = emptyPortfolioSection.dataset.originalDisplay;
+  } else {
+    emptyPortfolioSection.style.display = "none";
+  }
+};
+
 // select toggle (safe)
 if (select) {
   select.addEventListener("click", function () { elementToggleFunc(this); });
 }
-
-// filter variables
-const filterItems = document.querySelectorAll("[data-filter-item]");
 
 const filterFunc = function (selectedValue) {
   for (let i = 0; i < filterItems.length; i++) {
@@ -84,6 +107,9 @@ const filterFunc = function (selectedValue) {
       filterItems[i].classList.remove("active");
     }
   }
+
+  // NEW: update empty state after filtering (no other behavior change)
+  updatePortfolioEmptyState();
 };
 
 // add event in all select items (safe)
@@ -157,3 +183,5 @@ for (let n = 0; n < navigationLinks.length; n++) {
     }
   });
 }
+
+updatePortfolioEmptyState();
